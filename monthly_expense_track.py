@@ -52,6 +52,291 @@ def read_csv_file(filename):
         print(f"Error reading file: {e}")
         return None, None
 
+def display_expenses(expenses):
+    """Display all expenses in a formatted table."""
+    if not expenses:
+        print("  No expenses to display.")
+        return
+    
+    print("\n" + "-" * 70)
+    print(f"{'#':<4} {'Payee':<25} {'Amount':>12} {'Due Date':<15}")
+    print("-" * 70)
+    for i, exp in enumerate(expenses, 1):
+        print(f"{i:<4} {exp['Payee']:<25} ${exp['Amount']:>10.2f} {exp['Due Date'].strftime('%Y-%m-%d'):<15}")
+    print("-" * 70)
+
+def display_income(income):
+    """Display all income in a formatted table."""
+    if not income:
+        print("  No income to display.")
+        return
+    
+    print("\n" + "-" * 70)
+    print(f"{'#':<4} {'Bank':<25} {'Amount':>12} {'Balance Date':<15}")
+    print("-" * 70)
+    for i, inc in enumerate(income, 1):
+        print(f"{i:<4} {inc['Bank']:<25} ${inc['Amount']:>10.2f} {inc['Balance Date'].strftime('%Y-%m-%d'):<15}")
+    print("-" * 70)
+
+def add_expense(expenses):
+    """Add a new expense."""
+    print("\n--- Add New Expense ---")
+    print("Available payees:")
+    for i, payee in enumerate(PAYEES, 1):
+        print(f"  {i}. {payee}")
+    
+    payee_input = input("\nPayee name or number: ").strip()
+    
+    # Check if input is a number
+    if payee_input.isdigit():
+        idx = int(payee_input) - 1
+        if 0 <= idx < len(PAYEES):
+            payee = PAYEES[idx]
+        else:
+            print("Invalid payee number.")
+            return False
+    else:
+        payee = payee_input
+    
+    try:
+        amount = float(input("Amount: $"))
+        due_date_str = input("Due Date (YYYY-MM-DD): ")
+        due_date = datetime.strptime(due_date_str, '%Y-%m-%d')
+        
+        expenses.append({
+            'Payee': payee,
+            'Amount': amount,
+            'Due Date': due_date
+        })
+        print(f"✓ Added: {payee} - ${amount:.2f} due on {due_date.date()}")
+        return True
+    except ValueError as e:
+        print(f"Invalid input: {e}")
+        return False
+
+def modify_expense(expenses):
+    """Modify an existing expense."""
+    if not expenses:
+        print("No expenses to modify.")
+        return False
+    
+    display_expenses(expenses)
+    
+    try:
+        choice = int(input("\nEnter expense number to modify (0 to cancel): "))
+        if choice == 0:
+            return False
+        
+        if 1 <= choice <= len(expenses):
+            idx = choice - 1
+            exp = expenses[idx]
+            
+            print(f"\nModifying: {exp['Payee']} - ${exp['Amount']:.2f} due on {exp['Due Date'].strftime('%Y-%m-%d')}")
+            print("Press Enter to keep current value")
+            
+            # Modify payee
+            payee_input = input(f"Payee [{exp['Payee']}]: ").strip()
+            if payee_input:
+                exp['Payee'] = payee_input
+            
+            # Modify amount
+            amount_input = input(f"Amount [${exp['Amount']:.2f}]: $").strip()
+            if amount_input:
+                exp['Amount'] = float(amount_input)
+            
+            # Modify due date
+            date_input = input(f"Due Date [{exp['Due Date'].strftime('%Y-%m-%d')}]: ").strip()
+            if date_input:
+                exp['Due Date'] = datetime.strptime(date_input, '%Y-%m-%d')
+            
+            print("✓ Expense modified successfully")
+            return True
+        else:
+            print("Invalid expense number.")
+            return False
+    except (ValueError, IndexError) as e:
+        print(f"Invalid input: {e}")
+        return False
+
+def delete_expense(expenses):
+    """Delete an expense."""
+    if not expenses:
+        print("No expenses to delete.")
+        return False
+    
+    display_expenses(expenses)
+    
+    try:
+        choice = int(input("\nEnter expense number to delete (0 to cancel): "))
+        if choice == 0:
+            return False
+        
+        if 1 <= choice <= len(expenses):
+            idx = choice - 1
+            deleted = expenses.pop(idx)
+            print(f"✓ Deleted: {deleted['Payee']} - ${deleted['Amount']:.2f}")
+            return True
+        else:
+            print("Invalid expense number.")
+            return False
+    except (ValueError, IndexError) as e:
+        print(f"Invalid input: {e}")
+        return False
+
+def add_income(income):
+    """Add or update income entry."""
+    print("\n--- Add/Update Income ---")
+    print("Available banks:")
+    for i, bank in enumerate(INCOME_SOURCES, 1):
+        print(f"  {i}. {bank}")
+    
+    bank_input = input("\nBank name or number: ").strip()
+    
+    # Check if input is a number
+    if bank_input.isdigit():
+        idx = int(bank_input) - 1
+        if 0 <= idx < len(INCOME_SOURCES):
+            bank = INCOME_SOURCES[idx]
+        else:
+            print("Invalid bank number.")
+            return False
+    else:
+        bank = bank_input
+    
+    try:
+        amount = float(input("Amount: $"))
+        balance_date_str = input("Balance Date (YYYY-MM-DD): ")
+        balance_date = datetime.strptime(balance_date_str, '%Y-%m-%d')
+        
+        # Check if bank already exists and update, otherwise add
+        existing = next((inc for inc in income if inc['Bank'] == bank), None)
+        if existing:
+            existing['Amount'] = amount
+            existing['Balance Date'] = balance_date
+            print(f"✓ Updated: {bank} - ${amount:.2f}")
+        else:
+            income.append({
+                'Bank': bank,
+                'Amount': amount,
+                'Balance Date': balance_date
+            })
+            print(f"✓ Added: {bank} - ${amount:.2f}")
+        return True
+    except ValueError as e:
+        print(f"Invalid input: {e}")
+        return False
+
+def modify_income(income):
+    """Modify an existing income entry."""
+    if not income:
+        print("No income to modify.")
+        return False
+    
+    display_income(income)
+    
+    try:
+        choice = int(input("\nEnter income number to modify (0 to cancel): "))
+        if choice == 0:
+            return False
+        
+        if 1 <= choice <= len(income):
+            idx = choice - 1
+            inc = income[idx]
+            
+            print(f"\nModifying: {inc['Bank']} - ${inc['Amount']:.2f} as of {inc['Balance Date'].strftime('%Y-%m-%d')}")
+            print("Press Enter to keep current value")
+            
+            # Modify amount
+            amount_input = input(f"Amount [${inc['Amount']:.2f}]: $").strip()
+            if amount_input:
+                inc['Amount'] = float(amount_input)
+            
+            # Modify balance date
+            date_input = input(f"Balance Date [{inc['Balance Date'].strftime('%Y-%m-%d')}]: ").strip()
+            if date_input:
+                inc['Balance Date'] = datetime.strptime(date_input, '%Y-%m-%d')
+            
+            print("✓ Income modified successfully")
+            return True
+        else:
+            print("Invalid income number.")
+            return False
+    except (ValueError, IndexError) as e:
+        print(f"Invalid input: {e}")
+        return False
+
+def delete_income(income):
+    """Delete an income entry."""
+    if not income:
+        print("No income to delete.")
+        return False
+    
+    display_income(income)
+    
+    try:
+        choice = int(input("\nEnter income number to delete (0 to cancel): "))
+        if choice == 0:
+            return False
+        
+        if 1 <= choice <= len(income):
+            idx = choice - 1
+            deleted = income.pop(idx)
+            print(f"✓ Deleted: {deleted['Bank']} - ${deleted['Amount']:.2f}")
+            return True
+        else:
+            print("Invalid income number.")
+            return False
+    except (ValueError, IndexError) as e:
+        print(f"Invalid input: {e}")
+        return False
+
+def manage_data(expenses, income):
+    """Interactive menu to manage expenses and income."""
+    while True:
+        print("\n" + "="*60)
+        print("DATA MANAGEMENT MENU")
+        print("="*60)
+        print("Expenses:")
+        print("  1. View expenses")
+        print("  2. Add expense")
+        print("  3. Modify expense")
+        print("  4. Delete expense")
+        print("\nIncome:")
+        print("  5. View income")
+        print("  6. Add/Update income")
+        print("  7. Modify income")
+        print("  8. Delete income")
+        print("\n  9. Continue to analysis")
+        print("  0. Exit program")
+        print("="*60)
+        
+        choice = input("\nSelect option: ").strip()
+        
+        if choice == '1':
+            print("\n--- Current Expenses ---")
+            display_expenses(expenses)
+        elif choice == '2':
+            add_expense(expenses)
+        elif choice == '3':
+            modify_expense(expenses)
+        elif choice == '4':
+            delete_expense(expenses)
+        elif choice == '5':
+            print("\n--- Current Income ---")
+            display_income(income)
+        elif choice == '6':
+            add_income(income)
+        elif choice == '7':
+            modify_income(income)
+        elif choice == '8':
+            delete_income(income)
+        elif choice == '9':
+            return True
+        elif choice == '0':
+            return False
+        else:
+            print("Invalid option. Please try again.")
+
 def get_manual_expense_data():
     """Manually input expense data."""
     expenses = []
@@ -280,11 +565,26 @@ def main():
         if expenses is None or income is None:
             print("Failed to read CSV. Please enter data manually.")
             has_csv = False
+        else:
+            print(f"\n✓ Successfully loaded {len(expenses)} expense(s) and {len(income)} income source(s)")
+            
+            # Allow user to review and modify imported data
+            if get_yes_no_input("\nWould you like to review/modify the imported data? (yes/no): "):
+                if not manage_data(expenses, income):
+                    print("\nProgram terminated by user.")
+                    return
     
     if not has_csv:
         # Get manual input
         expenses = get_manual_expense_data()
         income = get_manual_income_data()
+        
+        # Allow user to review and modify manually entered data
+        if expenses or income:
+            if get_yes_no_input("\nWould you like to review/modify your entries? (yes/no): "):
+                if not manage_data(expenses, income):
+                    print("\nProgram terminated by user.")
+                    return
     
     # Save data to CSV
     save_to_csv(expenses, income)
