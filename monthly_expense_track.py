@@ -23,6 +23,26 @@ def get_yes_no_input(prompt):
         else:
             print("Please enter 'yes' or 'no'")
 
+def parse_date(date_string):
+    """Parse date string with multiple format support."""
+    date_formats = [
+        '%Y-%m-%d',      # 2026-02-10
+        '%m/%d/%Y',      # 2/10/2026 or 02/10/2026
+        '%m-%d-%Y',      # 2-10-2026 or 02-10-2026
+        '%Y/%m/%d',      # 2026/02/10
+        '%d/%m/%Y',      # 10/02/2026
+        '%d-%m-%Y',      # 10-02-2026
+    ]
+    
+    for fmt in date_formats:
+        try:
+            return datetime.strptime(date_string, fmt)
+        except ValueError:
+            continue
+    
+    # If none of the formats work, raise an error
+    raise ValueError(f"Unable to parse date '{date_string}'. Please use format YYYY-MM-DD, M/D/YYYY, or similar.")
+
 def read_csv_file(filename):
     """Read expense and income data from CSV file."""
     expenses = []
@@ -36,13 +56,13 @@ def read_csv_file(filename):
                     expenses.append({
                         'Payee': row['Payee'],
                         'Amount': float(row['Amount']),
-                        'Due Date': datetime.strptime(row['Due Date'], '%Y-%m-%d')
+                        'Due Date': parse_date(row['Due Date'])
                     })
                 elif row['Type'] == 'Income':
                     income.append({
                         'Bank': row['Bank'],
                         'Amount': float(row['Amount']),
-                        'Balance Date': datetime.strptime(row['Balance Date'], '%Y-%m-%d')
+                        'Balance Date': parse_date(row['Balance Date'])
                     })
         return expenses, income
     except FileNotFoundError:
@@ -540,9 +560,17 @@ def print_results(results):
         print("AFTER TRANSFER:")
         print(f"  SCCU Checking:    ${results['sccu_after']:>12.2f}")
         print(f"  E-Trade Savings:  ${results['etrade_after']:>12.2f}")
+        print()
+        print("AFTER PAYING EXPENSES:")
+        print(f"  SCCU Checking:    ${results['sccu_after'] - results['total_expenses']:>12.2f}")
+        print(f"    (Includes ${SAFETY_MARGIN:.2f} safety margin)")
     else:
         print("NO TRANSFER NEEDED")
         print(f"  Current SCCU balance is sufficient (includes ${SAFETY_MARGIN:.2f} safety margin)")
+        print()
+        print("AFTER PAYING EXPENSES:")
+        print(f"  SCCU Checking:    ${results['sccu_before'] - results['total_expenses']:>12.2f}")
+        print(f"    (Includes ${SAFETY_MARGIN:.2f} safety margin)")
     
     print("="*60)
 
