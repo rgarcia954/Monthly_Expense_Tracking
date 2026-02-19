@@ -72,6 +72,7 @@ After loading or entering data, you can:
 - Apple card YG
 - United Health
 - Medicare Pre
+- Other
 
 ## Income Sources
 
