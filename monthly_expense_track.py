@@ -6,7 +6,7 @@ from pathlib import Path
 PAYEES = [
     "Ameritus", "Capital One", "Chase Visa", "Medicare N", "Amex",
     "HOA Q", "HOA M", "Citibank Visa", "Apple card RG", 
-    "Apple card YG", "United Health", "Medicare Pre"
+    "Apple card YG", "United Health", "Medicare Pre", "Other"
 ]
 
 INCOME_SOURCES = ["SCCU Checking", "E-Trade Savings"]
