@@ -63,15 +63,18 @@ After loading or entering data, you can:
 - Ameritus
 - Capital One
 - Chase Visa
-- Medicare N
-- Amex
+- Medicare N RG
+- Medicare N YG
+- Amex YG
+- Amex RG
 - HOA Q
 - HOA M
 - Citibank Visa
 - Apple card RG
 - Apple card YG
 - United Health
-- Medicare Pre
+- Medicare RG
+- Medicare YG
 - Other
 
 ## Income Sources
