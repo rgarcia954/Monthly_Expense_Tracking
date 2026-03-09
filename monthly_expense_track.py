@@ -4,9 +4,9 @@ from pathlib import Path
 
 # Constants
 PAYEES = [
-    "Ameritus", "Capital One", "Chase Visa", "Medicare N", "Amex",
-    "HOA Q", "HOA M", "Citibank Visa", "Apple card RG", 
-    "Apple card YG", "United Health", "Medicare Pre", "Other"
+    "Ameritus", "Capital One", "Chase Visa", "Medicare N RG", "Medicare N YG", 
+    "Amex YG", "Amex RG", "HOA Q", "HOA M", "Citibank Visa", "Apple card RG", 
+    "Apple card YG", "United Health", "Medicare RG", "Medicare YG", "Other"
 ]
 
 INCOME_SOURCES = ["SCCU Checking", "E-Trade Savings"]
