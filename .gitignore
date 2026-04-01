@@ -3,3 +3,4 @@
 archive/
 *.txt
 .gitattributes
+.DS_Store
