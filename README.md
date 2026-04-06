@@ -146,15 +146,18 @@ BEFORE TRANSFER:
   SCCU Checking:          $1500.00
   E-Trade Savings:       $25000.00
 
-RECOMMENDED TRANSFER: $250.00
-  (Expenses: $750.00 + Safety Margin: $1000.00)
+  (Recommendation based on: Expenses $750.00 + Safety Margin $1000.00)
+
+Enter actual transfer amount (or press Enter to use recommended $1750.00): $2000
+
+ACTUAL TRANSFER: $2000.00
 
 AFTER TRANSFER:
-  SCCU Checking:          $1750.00
-  E-Trade Savings:       $24750.00
+  SCCU Checking:          $3500.00
+  E-Trade Savings:       $23000.00
 
 AFTER PAYING EXPENSES:
-  SCCU Checking:          $1000.00
+  SCCU Checking:          $2750.00
     (Includes $1000.00 safety margin)
 ============================================================
 ```
@@ -166,6 +169,9 @@ AFTER PAYING EXPENSES:
 - The $1,000 safety margin can be adjusted by modifying the `SAFETY_MARGIN` constant in the code
 - Press Enter when modifying entries to keep the current value
 - Add expenses for the next month - they'll be tracked but won't affect current calculations
+- When prompted for transfer amount, press Enter to accept the recommended amount or enter your own
+- Use "Other" as a payee for miscellaneous or one-time expenses
+- If you transfer less than recommended, the program will warn you if your final balance falls below the safety margin
 
 ## Contributing
 

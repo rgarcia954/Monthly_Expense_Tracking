@@ -518,6 +518,37 @@ def calculate_transfer(expenses, income):
         'etrade_after': etrade_balance - transfer_amount
     }
 
+def get_actual_transfer_amount(recommended_amount, sccu_before, etrade_before):
+    """Get the actual transfer amount from user."""
+    if recommended_amount <= 0:
+        return 0.0
+    
+    print(f"\nRECOMMENDED TRANSFER: ${recommended_amount:.2f}")
+    
+    while True:
+        user_input = input(f"\nEnter actual transfer amount (or press Enter to use recommended ${recommended_amount:.2f}): $").strip()
+        
+        # If user presses Enter, use recommended amount
+        if not user_input:
+            return recommended_amount
+        
+        try:
+            actual_amount = float(user_input)
+            
+            # Validate the amount
+            if actual_amount < 0:
+                print("Transfer amount cannot be negative. Please try again.")
+                continue
+            
+            if actual_amount > etrade_before:
+                print(f"Transfer amount cannot exceed E-Trade Savings balance (${etrade_before:.2f}). Please try again.")
+                continue
+            
+            return actual_amount
+            
+        except ValueError:
+            print("Invalid amount. Please enter a number.")
+
 def print_results(results):
     """Print the analysis results."""
     print("\n" + "="*60)
@@ -554,16 +585,35 @@ def print_results(results):
     print()
     
     if results['transfer_amount'] > 0:
-        print(f"RECOMMENDED TRANSFER: ${results['transfer_amount']:.2f}")
-        print(f"  (Expenses: ${results['total_expenses']:.2f} + Safety Margin: ${SAFETY_MARGIN:.2f})")
+        print(f"  (Recommendation based on: Expenses ${results['total_expenses']:.2f} + Safety Margin ${SAFETY_MARGIN:.2f})")
+        
+        # Get actual transfer amount from user
+        actual_transfer = get_actual_transfer_amount(
+            results['transfer_amount'], 
+            results['sccu_before'], 
+            results['etrade_before']
+        )
+        
+        # Recalculate balances with actual transfer
+        sccu_after = results['sccu_before'] + actual_transfer
+        etrade_after = results['etrade_before'] - actual_transfer
+        
+        print()
+        print(f"ACTUAL TRANSFER: ${actual_transfer:.2f}")
         print()
         print("AFTER TRANSFER:")
-        print(f"  SCCU Checking:    ${results['sccu_after']:>12.2f}")
-        print(f"  E-Trade Savings:  ${results['etrade_after']:>12.2f}")
+        print(f"  SCCU Checking:    ${sccu_after:>12.2f}")
+        print(f"  E-Trade Savings:  ${etrade_after:>12.2f}")
         print()
         print("AFTER PAYING EXPENSES:")
-        print(f"  SCCU Checking:    ${results['sccu_after'] - results['total_expenses']:>12.2f}")
-        print(f"    (Includes ${SAFETY_MARGIN:.2f} safety margin)")
+        print(f"  SCCU Checking:    ${sccu_after - results['total_expenses']:>12.2f}")
+        
+        # Show warning if below safety margin
+        final_balance = sccu_after - results['total_expenses']
+        if final_balance < SAFETY_MARGIN:
+            print(f"    ⚠️  WARNING: Balance is ${SAFETY_MARGIN - final_balance:.2f} below safety margin!")
+        else:
+            print(f"    (Includes ${final_balance - (final_balance - SAFETY_MARGIN):.2f} safety margin)")
     else:
         print("NO TRANSFER NEEDED")
         print(f"  Current SCCU balance is sufficient (includes ${SAFETY_MARGIN:.2f} safety margin)")
