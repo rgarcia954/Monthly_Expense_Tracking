@@ -475,7 +475,7 @@ def calculate_transfer(expenses, income):
         end_day = 31  # Will handle month-end automatically
     
     # Filter expenses for current period that are due on or after today
-    # Only include expenses in the current month, exclude next month
+    # Only include expenses in the current month for the current period
     relevant_expenses = [
         exp for exp in expenses
         if exp['Due Date'].month == current_date.month
@@ -484,12 +484,39 @@ def calculate_transfer(expenses, income):
         and exp['Due Date'].date() >= current_date.date()
     ]
     
-    # Count excluded next month expenses for user information
-    next_month_expenses = [
-        exp for exp in expenses
-        if (exp['Due Date'].year > current_date.year or 
-            (exp['Due Date'].year == current_date.year and exp['Due Date'].month > current_date.month))
-    ]
+    # Determine future expenses based on current period
+    if current_day <= 15:
+        # First half: future = second half of current month + all of next month and beyond
+        future_expenses = [
+            exp for exp in expenses
+            if (exp['Due Date'].year == current_date.year and 
+                exp['Due Date'].month == current_date.month and 
+                exp['Due Date'].day > 15) or
+               (exp['Due Date'].year > current_date.year) or
+               (exp['Due Date'].year == current_date.year and 
+                exp['Due Date'].month > current_date.month)
+        ]
+    else:
+        # Second half: future = first half of next month and beyond
+        future_expenses = []
+        for exp in expenses:
+            exp_date = exp['Due Date']
+            # Calculate next month
+            if current_date.month == 12:
+                next_month = 1
+                next_year = current_date.year + 1
+            else:
+                next_month = current_date.month + 1
+                next_year = current_date.year
+            
+            # Include if in first half of next month or beyond
+            if ((exp_date.year == next_year and 
+                 exp_date.month == next_month and 
+                 exp_date.day <= 15) or
+                (exp_date.year > next_year) or
+                (exp_date.year == next_year and 
+                 exp_date.month > next_month)):
+                future_expenses.append(exp)
     
     total_expenses = sum(exp['Amount'] for exp in relevant_expenses)
     
@@ -509,7 +536,7 @@ def calculate_transfer(expenses, income):
         'period': period,
         'current_date': current_date,
         'relevant_expenses': relevant_expenses,
-        'next_month_expenses': next_month_expenses,
+        'future_expenses': future_expenses,
         'total_expenses': total_expenses,
         'sccu_before': sccu_balance,
         'etrade_before': etrade_balance,
@@ -569,11 +596,11 @@ def print_results(results):
         print("  No upcoming expenses for this period.")
     print()
     
-    # Show next month expenses if any
-    if results['next_month_expenses']:
-        print("NEXT MONTH EXPENSES (Not included in transfer calculation):")
+    # Show future expenses if any
+    if results['future_expenses']:
+        print("FUTURE EXPENSES (Not included in current transfer calculation):")
         print("-" * 60)
-        for exp in sorted(results['next_month_expenses'], key=lambda x: x['Due Date']):
+        for exp in sorted(results['future_expenses'], key=lambda x: x['Due Date']):
             print(f"  {exp['Due Date'].strftime('%Y-%m-%d')} | {exp['Payee']:<20} | ${exp['Amount']:>10.2f}")
         print()
     

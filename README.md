@@ -91,13 +91,18 @@ The program determines transfer needs based on:
 3. **Safety Margin**: Adds $1,000 buffer to ensure sufficient funds
 4. **Smart Filtering**: 
    - Ignores expenses from previous dates (assumes already paid)
-   - Excludes next month's expenses from current calculations
-   - Only processes expenses in the current month
+   - Separates future expenses from current period calculations
+   - First half: Future expenses are second half of current month and beyond
+   - Second half: Future expenses are first half of next month and beyond
 
 ### Transfer Rules
 
-- **First Half (Days 1-15)**: Transfer covers all expenses due between days 1-15
-- **Second Half (Days 16-31)**: Transfer covers all expenses due between days 16-31
+- **First Half (Days 1-15)**: 
+  - Transfer covers all expenses due between days 1-15
+  - Future expenses include: second half of current month and beyond
+- **Second Half (Days 16-31)**: 
+  - Transfer covers all expenses due between days 16-31
+  - Future expenses include: first half of next month and beyond
 - Maximum of two transfers per month (one per period)
 
 ## CSV File Format
@@ -168,10 +173,11 @@ AFTER PAYING EXPENSES:
 - Run the program at the beginning of each pay period to plan transfers
 - The $1,000 safety margin can be adjusted by modifying the `SAFETY_MARGIN` constant in the code
 - Press Enter when modifying entries to keep the current value
-- Add expenses for the next month - they'll be tracked but won't affect current calculations
+- Add expenses for future periods - they'll be tracked separately and won't affect current calculations
 - When prompted for transfer amount, press Enter to accept the recommended amount or enter your own
 - Use "Other" as a payee for miscellaneous or one-time expenses
 - If you transfer less than recommended, the program will warn you if your final balance falls below the safety margin
+- Future expenses are displayed for planning purposes but don't impact the current period's transfer recommendation
 
 ## Contributing
 
