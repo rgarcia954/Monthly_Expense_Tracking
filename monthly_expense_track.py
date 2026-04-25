@@ -497,7 +497,7 @@ def calculate_transfer(expenses, income):
                 exp['Due Date'].month > current_date.month)
         ]
     else:
-        # Second half: future = first half of next month and beyond
+        # Second half: future = all of next month and beyond
         future_expenses = []
         for exp in expenses:
             exp_date = exp['Due Date']
@@ -509,13 +509,10 @@ def calculate_transfer(expenses, income):
                 next_month = current_date.month + 1
                 next_year = current_date.year
             
-            # Include if in first half of next month or beyond
-            if ((exp_date.year == next_year and 
-                 exp_date.month == next_month and 
-                 exp_date.day <= 15) or
+            # Include if in next month or beyond
+            if ((exp_date.year == next_year and exp_date.month == next_month) or
                 (exp_date.year > next_year) or
-                (exp_date.year == next_year and 
-                 exp_date.month > next_month)):
+                (exp_date.year == next_year and exp_date.month > next_month)):
                 future_expenses.append(exp)
     
     total_expenses = sum(exp['Amount'] for exp in relevant_expenses)
