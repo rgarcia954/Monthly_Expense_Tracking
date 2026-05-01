@@ -72,7 +72,6 @@ After loading or entering data, you can:
 - Citibank Visa
 - Apple card RG
 - Apple card YG
-- United Health
 - Medicare RG
 - Medicare YG
 - Other
