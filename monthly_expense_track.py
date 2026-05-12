@@ -475,31 +475,36 @@ def calculate_transfer(expenses, income):
         end_day = 31  # Will handle month-end automatically
     
     # Filter expenses for current period that are due on or after today
-    # Only include expenses in the current month for the current period
+    # Only include expenses in the current month for the current period with non-zero amounts
     relevant_expenses = [
         exp for exp in expenses
         if exp['Due Date'].month == current_date.month
         and exp['Due Date'].year == current_date.year
         and start_day <= exp['Due Date'].day <= end_day
         and exp['Due Date'].date() >= current_date.date()
+        and exp['Amount'] > 0  # Only non-zero expenses
     ]
     
-    # Determine future expenses based on current period
+    # Determine future expenses based on current period (only non-zero amounts)
     if current_day <= 15:
         # First half: future = second half of current month + all of next month and beyond
         future_expenses = [
             exp for exp in expenses
-            if (exp['Due Date'].year == current_date.year and 
-                exp['Due Date'].month == current_date.month and 
-                exp['Due Date'].day > 15) or
-               (exp['Due Date'].year > current_date.year) or
-               (exp['Due Date'].year == current_date.year and 
-                exp['Due Date'].month > current_date.month)
+            if exp['Amount'] > 0 and  # Only non-zero expenses
+               ((exp['Due Date'].year == current_date.year and 
+                 exp['Due Date'].month == current_date.month and 
+                 exp['Due Date'].day > 15) or
+                (exp['Due Date'].year > current_date.year) or
+                (exp['Due Date'].year == current_date.year and 
+                 exp['Due Date'].month > current_date.month))
         ]
     else:
         # Second half: future = all of next month and beyond
         future_expenses = []
         for exp in expenses:
+            if exp['Amount'] == 0:  # Skip zero expenses
+                continue
+                
             exp_date = exp['Due Date']
             # Calculate next month
             if current_date.month == 12:
